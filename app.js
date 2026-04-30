@@ -20,19 +20,30 @@ app.get('/', (req, res) => res.send('Hello World'));
 // la accesarea din browser adresei http://localhost:6789/chestionar se va apela funcția specificată
 app.get('/chestionar', (req, res) => {
     const listaIntrebari = [
-        {
-            intrebare: 'Întrebarea 1',
-            variante: ['varianta 1', 'varianta 2', 'varianta 3', 'varianta 4'],
-            corect: 0
-        },
-        //...
+        { intrebare: 'Întrebarea 1?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 0 },
+        { intrebare: 'Întrebarea 2?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 2 },
+        { intrebare: 'Întrebarea 3?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 1 },
     ];
     // în fișierul views/chestionar.ejs este accesibilă variabila 'intrebari' care conține vectorul de întrebări
     res.render('chestionar', { intrebari: listaIntrebari });
 });
 app.post('/rezultat-chestionar', (req, res) => {
-    console.log(req.body);
-    res.send("formular: " + JSON.stringify(req.body));
+    const listaIntrebari = [
+        { intrebare: 'Întrebarea 1?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 0 },
+        { intrebare: 'Întrebarea 2?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 2 },
+        { intrebare: 'Întrebarea 3?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 1 },
+    ];
+
+    let corecte = 0;
+    listaIntrebari.forEach((item, index) => {
+        const raspuns = parseInt(req.body[`intrebare_${index}`]);
+        if (raspuns === item.corect) 
+            corecte++;
+    });
+
+    res.render('rezultat-chestionar', {
+        corecte: corecte,
+        total: listaIntrebari.length
+    });
 });
-app.listen(port, () => console.log(`Serverul rulează la adresa http://localhost:
-:${port}/`));
+app.listen(port, () => console.log(`Serverul rulează la adresa http://localhost:${port}/`));
