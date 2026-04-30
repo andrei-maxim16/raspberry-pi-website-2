@@ -1,0 +1,21 @@
+<h2>Chestionar</h2>
+
+<form action="/rezultat-chestionar" method="POST">
+    <% intrebari.forEach((item, index)=> { %>
+        <div>
+            <p><strong>
+                    <%= index + 1 %>. <%= item.intrebare %>
+                </strong></p>
+
+            <% item.variante.forEach((varianta, i)=> { %>
+                <label>
+                    <input type="radio" name="intrebare_<%= index %>" value="<%= i %>">
+                    <%= varianta %>
+                </label><br>
+                <% }) %>
+        </div>
+        <br>
+        <% }) %>
+
+            <button type="submit">Trimite</button>
+</form>
