@@ -1,0 +1,27 @@
+ [
+      {
+          "intrebare": "Care fruct conține cea mai mare cantitate de vitamina C?",
+          "variante": ["Măr", "Portocală", "Kiwi", "Lămâie"],
+          "corect": 2
+      },
+      {
+          "intrebare": "Din ce familie face parte căpșuna?",
+          "variante": ["Citrice", "Rozacee", "Cucurbitacee", "Solanacee"],
+          "corect": 1
+      },
+      {
+          "intrebare": "Ce fruct este cunoscut ca \"regele fructelor\"?",
+          "variante": ["Mango", "Ananas", "Durian", "Papaya"],
+          "corect": 2
+      },
+      {
+          "intrebare": "Care dintre următoarele fructe este de fapt o baca din punct de vedere botanic?",
+          "variante": ["Căpșună", "Zmeură", "Banana", "Cireașă"],
+          "corect": 2
+      },
+      {
+          "intrebare": "În ce țară a fost cultivat primul pepene verde?",
+          "variante": ["China", "India", "Africa de Sud", "Brazilia"],
+          "corect": 2
+      }
+  ]

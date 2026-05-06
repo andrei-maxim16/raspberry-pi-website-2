@@ -16,34 +16,45 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // la accesarea din browser adresei http://localhost:6789/ se va returna textul 'Hello World'
 // proprietățile obiectului Request - req - https://expressjs.com/en/api.html#req
 // proprietățile obiectului Response - res - https://expressjs.com/en/api.html#res
-app.get('/', (req, res) => res.send('Hello World'));
+app.get('/', (req, res) => res.send('Hello world!'));
 // la accesarea din browser adresei http://localhost:6789/chestionar se va apela funcția specificată
+
+fs = require('fs');
+
 app.get('/chestionar', (req, res) => {
-    const listaIntrebari = [
-        { intrebare: 'Întrebarea 1?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 0 },
-        { intrebare: 'Întrebarea 2?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 2 },
-        { intrebare: 'Întrebarea 3?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 1 },
-    ];
+    fs.readFile('intrebari.json', (err, data) => {
+        if (err) 
+        {
+            res.status(500).send('Eroare la citirea intrebarilor');
+            return;
+        }
+        const listaIntrebari = JSON.parse(data);
+        res.render('chestionar', { intrebari: listaIntrebari });
+    });
     // în fișierul views/chestionar.ejs este accesibilă variabila 'intrebari' care conține vectorul de întrebări
-    res.render('chestionar', { intrebari: listaIntrebari });
 });
+
 app.post('/rezultat-chestionar', (req, res) => {
-    const listaIntrebari = [
-        { intrebare: 'Întrebarea 1?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 0 },
-        { intrebare: 'Întrebarea 2?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 2 },
-        { intrebare: 'Întrebarea 3?', variante: ['var1', 'var2', 'var3', 'var4'], corect: 1 },
-    ];
+    fs.readFile('intrebari.json', (err, data) => {
+        if (err) 
+        {
+            res.status(500).send('Eroare la citirea intrebarilor');
+            return;
+        }
+        const listaIntrebari = JSON.parse(data);
 
-    let corecte = 0;
-    listaIntrebari.forEach((item, index) => {
-        const raspuns = parseInt(req.body[`intrebare_${index}`]);
-        if (raspuns === item.corect) 
-            corecte++;
-    });
+        let corecte = 0;
+        listaIntrebari.forEach((item, index) => {
+            const raspuns = parseInt(req.body[`intrebare_${index}`]);
+            if (raspuns === item.corect)
+                corecte++;
+        });
 
-    res.render('rezultat-chestionar', {
-        corecte: corecte,
-        total: listaIntrebari.length
+        res.render('rezultat-chestionar', {
+            corecte: corecte,
+            total: listaIntrebari.length
+        });
     });
 });
+
 app.listen(port, () => console.log(`Serverul rulează la adresa http://localhost:${port}/`));
