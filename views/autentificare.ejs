@@ -1,0 +1,10 @@
+<h2>Autentificare</h2>
+
+<form action="/verificare-autentificare" method="POST">
+    <label>Utilizator: <input type="text" name="user"></label><br><br>
+    <label>Parola: <input type="password" name="password"></label><br><br>
+    <button type="submit"><Autentificare></button>
+        <% if (mesajEroare) { %>
+                <p style="color: red;"><%= mesajEroare %></p>
+        <% } %>
+</form>
