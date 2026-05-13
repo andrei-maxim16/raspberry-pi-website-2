@@ -1,4 +1,5 @@
 const cookieParser = require('cookie-parser');
+const Database = require('better-sqlite3');
 const session = require('express-session');
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
@@ -72,5 +73,36 @@ app.post('/rezultat-chestionar', (req, res) => {
         });
     });
 });
+
+app.get('/creare-db', (req, res) => {
+    const db = new Database('cumparaturi.db');
+      db.prepare(`
+          CREATE TABLE IF NOT EXISTS fruits (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              price REAL NOT NULL
+          )
+      `).run();
+      db.close();
+      res.redirect('/');
+});
+
+app.get('/inserare-db', (req, res) => {
+    const db = new Database('cumparaturi.db');
+    const insert = db.prepare('INSERT INTO fruits (name, price) VALUES (@name, @price)');
+    const insertMany = db.transaction((fruits) => {
+        for (const fruit of fruits) 
+            insert.run(fruit);
+    });
+
+    insertMany([
+        { name: 'Banana', price: 2},
+        { name: 'Apple', price: 1 },
+        { name: 'Strawberry', price: 3 },
+    ]);
+
+    db.close();
+    res.redirect('/');
+  });
 
 app.listen(port, () => console.log(`Serverul rulează la adresa http://localhost:${port}/`));
