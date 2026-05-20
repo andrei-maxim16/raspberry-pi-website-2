@@ -2,8 +2,8 @@
 
 <a href="/autentificare">Autentificare</a><br>
 
-<% if (user) { %>
-    <p>Bine ai venit, <%= user %>!</p>
+<% if (locals.sessionUser) { %>
+    <p>Bine ai venit, <%= sessionUser.prenume %> <%= sessionUser.nume %>!</p>
 <% } %>
 
 <a href="/creare-db"><button>Creare BD</button></a><br>

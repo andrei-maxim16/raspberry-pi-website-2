@@ -13,6 +13,11 @@
               <a href="/">Acasă</a>
               <a href="/chestionar">Chestionar</a>
           </nav>
+        <% if (locals.sessionUser) 
+        { %>
+            <span>Autentificat ca <strong><%= sessionUser.prenume %> <%= sessionUser.nume %></strong></span>
+            <a href="/delogare"><button>Delogare</button></a>
+        <% } %>  
       </header>
 
       <main>

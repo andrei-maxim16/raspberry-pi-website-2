@@ -8,6 +8,18 @@ const app = express();
 const port = 6789;
 
 app.use(cookieParser());
+
+app.use(session({
+    secret: 'secret-key',
+    resave: false,
+    saveUninitialized: false
+}));
+
+//middleware care face datele utilizatorului din sesiune disponibile în toate view-urile
+app.use((req, res, next) => {
+    res.locals.sessionUser = req.session.user;
+    next();
+});
 // directorul 'views' va conține fișierele .ejs (html + js executat la server)
 app.set('view engine', 'ejs');
 // suport pentru layout-uri - implicit fișierul care reprezintă template-ul site-ului este views/layout.ejs
@@ -21,7 +33,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // la accesarea din browser adresei http://localhost:6789/ se va returna textul 'Hello World'
 // proprietățile obiectului Request - req - https://expressjs.com/en/api.html#req
 // proprietățile obiectului Response - res - https://expressjs.com/en/api.html#res
-app.get('/', (req, res) => res.render('index', { user: req.cookies.user }));
+app.get('/', (req, res) => res.render('index'));
 // la accesarea din browser adresei http://localhost:6789/chestionar se va apela funcția specificată
 
 fs = require('fs');
@@ -41,15 +53,25 @@ app.get('/chestionar', (req, res) => {
 app.get('/autentificare', (req, res) => res.render('autentificare', { mesajEroare: req.cookies.mesajEroare }));
 
 app.post('/verificare-autentificare', (req, res) => {
-    console.log(req.body);
-    if (req.body.user == 'admin' && req.body.password == 'admin') {
-        res.cookie('user', req.body.user);
-        res.redirect('/');
-    }
-    else {
-        res.cookie('mesajEroare', 'Utilizator sau parola incorecte!');
-        res.redirect('/autentificare');
-    }
+    fs.readFile('utilizatori.json', (err, data) => {
+        const utilizatori = JSON.parse(data);
+        const utilizator = utilizatori.find(u => u.utilizator == req.body.user && u.parola == req.body.pass);
+        if (utilizator)
+        {
+            req.session.user = { utilizator: utilizator.utilizator, nume: utilizator.nume, prenume: utilizator.prenume };
+            res.redirect('/');
+        }
+        else
+        {
+            res.cookie('mesajEroare', 'Utilizator sau parola incorecte!');
+            res.redirect('/autentificare');
+        }
+    });
+});
+
+app.get('/delogare', (req, res) => {
+    req.session.destroy();
+    res.redirect('/');
 });
 
 app.post('/rezultat-chestionar', (req, res) => {
@@ -76,33 +98,33 @@ app.post('/rezultat-chestionar', (req, res) => {
 
 app.get('/creare-db', (req, res) => {
     const db = new Database('cumparaturi.db');
-      db.prepare(`
+    db.prepare(`
           CREATE TABLE IF NOT EXISTS fruits (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               name TEXT NOT NULL,
               price REAL NOT NULL
           )
       `).run();
-      db.close();
-      res.redirect('/');
+    db.close();
+    res.redirect('/');
 });
 
 app.get('/inserare-db', (req, res) => {
     const db = new Database('cumparaturi.db');
     const insert = db.prepare('INSERT INTO fruits (name, price) VALUES (@name, @price)');
     const insertMany = db.transaction((fruits) => {
-        for (const fruit of fruits) 
+        for (const fruit of fruits)
             insert.run(fruit);
     });
 
     insertMany([
-        { name: 'Banana', price: 2},
+        { name: 'Banana', price: 2 },
         { name: 'Apple', price: 1 },
         { name: 'Strawberry', price: 3 },
     ]);
 
     db.close();
     res.redirect('/');
-  });
+});
 
 app.listen(port, () => console.log(`Serverul rulează la adresa http://localhost:${port}/`));
