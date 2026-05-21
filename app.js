@@ -34,6 +34,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // proprietățile obiectului Request - req - https://expressjs.com/en/api.html#req
 // proprietățile obiectului Response - res - https://expressjs.com/en/api.html#res
 app.get('/', (req, res) => res.render('index'));
+app.get('/', (req, res) => {
+    const db = new Database('cumparaturi.db');
+    let fruits = [];
+    try 
+    {
+        fruits = db.prepare('SELECT * FROM fruits').all();
+    } catch(e) {}
+      db.close();
+      res.render('index', { user: req.cookies.user, fruits: fruits });    
+});
 // la accesarea din browser adresei http://localhost:6789/chestionar se va apela funcția specificată
 
 fs = require('fs');
@@ -126,5 +136,11 @@ app.get('/inserare-db', (req, res) => {
     db.close();
     res.redirect('/');
 });
+
+  app.get('/adaugare-cos', (req, res) => {
+    const id = parseInt(req.body.id);
+    cos.push(id);
+    res.redirect('/');
+})
 
 app.listen(port, () => console.log(`Serverul rulează la adresa http://localhost:${port}/`));
