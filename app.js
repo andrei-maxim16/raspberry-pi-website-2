@@ -3,7 +3,8 @@ const Database = require('better-sqlite3');
 const session = require('express-session');
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
 const app = express();
 const port = 6789;
 
@@ -33,20 +34,49 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // la accesarea din browser adresei http://localhost:6789/ se va returna textul 'Hello World'
 // proprietățile obiectului Request - req - https://expressjs.com/en/api.html#req
 // proprietățile obiectului Response - res - https://expressjs.com/en/api.html#res
-app.get('/', (req, res) => res.render('index'));
 app.get('/', (req, res) => {
     const db = new Database('cumparaturi.db');
     let fruits = [];
-    try 
-    {
+    try {
         fruits = db.prepare('SELECT * FROM fruits').all();
-    } catch(e) {}
-      db.close();
-      res.render('index', { user: req.cookies.user, fruits: fruits });    
+    } catch (e) { }
+    db.close();
+    res.render('index', { user: req.cookies.user, fruits: fruits });
 });
 // la accesarea din browser adresei http://localhost:6789/chestionar se va apela funcția specificată
 
 fs = require('fs');
+
+const utilizatori = JSON.parse(fs.readFileSync('utilizatori.json', 'utf8'));
+let modificat = false;
+for (const u of utilizatori) {
+    if (!u.parola.startsWith('$2b$')) {
+        u.parola = bcrypt.hashSync(u.parola, 10);
+        modificat = true;
+    }
+}
+if (modificat) {
+    fs.writeFileSync('utilizatori.json', JSON.stringify(utilizatori, null, 4));
+}
+
+function sanitize(input) {
+    if (typeof input !== 'string')
+        return '';
+    return input.trim()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+}
+
+function validateLogin(user, pass) {
+    if (!user || user.trim().length === 0)
+        return 'Utilizatorul este obligatoriu.';
+    if (!pass || pass.trim().length === 0)
+        return 'Parola este obligatorie.';
+    return null;
+}
 
 app.get('/chestionar', (req, res) => {
     fs.readFile('intrebari.json', (err, data) => {
@@ -63,20 +93,25 @@ app.get('/chestionar', (req, res) => {
 app.get('/autentificare', (req, res) => res.render('autentificare', { mesajEroare: req.cookies.mesajEroare }));
 
 app.post('/verificare-autentificare', (req, res) => {
-    fs.readFile('utilizatori.json', (err, data) => {
-        const utilizatori = JSON.parse(data);
-        const utilizator = utilizatori.find(u => u.utilizator == req.body.user && u.parola == req.body.pass);
-        if (utilizator)
-        {
-            req.session.user = { utilizator: utilizator.utilizator, nume: utilizator.nume, prenume: utilizator.prenume };
-            res.redirect('/');
-        }
-        else
-        {
-            res.cookie('mesajEroare', 'Utilizator sau parola incorecte!');
-            res.redirect('/autentificare');
-        }
-    });
+    const eroare = validateLogin(req.body.user, req.body.pass);
+    if (eroare) {
+        res.cookie('mesajEroare', eroare);
+        return res.redirect('/autentificare');
+    }
+
+    const userSanitized = sanitize(req.body.user);
+    const utilizator = utilizatori.find(u => u.utilizator === userSanitized);
+
+    if (utilizator && bcrypt.compareSync(req.body.pass, utilizator.parola)) {
+        req.session.user = {
+            utilizator: utilizator.utilizator, nume:
+                utilizator.nume, prenume: utilizator.prenume
+        };
+        res.redirect('/');
+    } else {
+        res.cookie('mesajEroare', 'Utilizator sau parola incorecte!');
+        res.redirect('/autentificare');
+    }
 });
 
 app.get('/delogare', (req, res) => {
@@ -137,7 +172,7 @@ app.get('/inserare-db', (req, res) => {
     res.redirect('/');
 });
 
-  app.get('/adaugare-cos', (req, res) => {
+app.get('/adaugare-cos', (req, res) => {
     const id = parseInt(req.body.id);
     cos.push(id);
     res.redirect('/');

@@ -9,20 +9,12 @@
 <a href="/creare-db"><button>Creare BD</button></a><br>
 <a href="/inserare-db"><button>Incarcare BD</button></a><br>
 
-<% if (produse && produse.length > 0) { %>
-      <ul>
-          <% produse.forEach(produs => { %>
-              <li><%= produs.name %> - <%= produs.price %> lei</li>
-          <% }) %>
-      </ul>
-<% } %>
-
-<% produse.forEach(produs => { %>
+<% fruits.forEach(fruit => { %>
     <li>
-          <%= produs.name %> - <%= produs.price %> lei
-          <% if (user) { %>
+          <%= fruit.name %> - <%= fruit.price %> lei
+          <% if (sessionUser) { %>
               <form action="/adaugare-cos" method="POST" style="display:inline">
-                  <input type="hidden" name="id" value="<%= produs.id %>">
+                  <input type="hidden" name="id" value="<%= fruit.id %>">
                   <button type="submit">Adauga in cos</button>
               </form>
           <% } %>

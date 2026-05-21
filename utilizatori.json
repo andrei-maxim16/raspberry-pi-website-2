@@ -1,19 +1,19 @@
 [
     {
         "utilizator": "test",
-        "parola": "test",
+        "parola": "$2b$10$qwn77bcMK5JvIPD7Zvy1AO9pgeBVbqsDubqeLJGmlG8HDahI0W.Ai",
         "nume": "Test",
         "prenume": "Utilizator"
     },
     {
         "utilizator": "admin",
-        "parola": "1234",
+        "parola": "$2b$10$RHc2yXfwQmxU.EaPvBVxre7sWpYOrjquVKFYjSM/kV78Ym6P.IJta",
         "nume": "Popescu",
         "prenume": "Ion"
     },
     {
         "utilizator": "andrei.maxim",
-        "parola": "parola",
+        "parola": "$2b$10$W2x6xqZowWlOLtkHEUWEvO0mG4uIdA0IrDBc476JnuNsbcR2afNR2",
         "nume": "Maxim",
         "prenume": "Andrei"
     }
