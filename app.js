@@ -23,9 +23,9 @@ app.use((req, res, next) => {
 });
 
 function requireAdmin(req, res, next) {
-    if (!req.session.user) 
+    if (!req.session.user)
         return res.status(401).send('Neautentificat');
-    if (req.session.user.rol !== 'ADMIN') 
+    if (req.session.user.rol !== 'ADMIN')
         return res.status(403).send('403 Forbidden');
     next();
 }
@@ -105,11 +105,11 @@ app.get('/admin', requireAdmin, (req, res) => {
 });
 
 app.post('/admin/adaugare-produs', requireAdmin, (req, res) => {
-      const db = new Database('cumparaturi.db');
-      db.prepare('INSERT INTO fruits (name, price) VALUES (?, ?)').run(req.body.name, parseFloat(req.body.price));
-      db.close();
-      res.redirect('/admin');
-  });
+    const db = new Database('cumparaturi.db');
+    db.prepare('INSERT INTO fruits (name, price) VALUES (?, ?)').run(req.body.name, parseFloat(req.body.price));
+    db.close();
+    res.redirect('/admin');
+});
 
 app.post('/verificare-autentificare', (req, res) => {
     const eroare = validateLogin(req.body.user, req.body.pass);
@@ -195,10 +195,18 @@ app.get('/inserare-db', (req, res) => {
 
 app.post('/adaugare-cos', (req, res) => {
     const id = parseInt(req.body.id);
-    if (!req.session.cos) 
+    if (!req.session.cos)
         req.session.cos = [];
     req.session.cos.push(id);
     res.redirect('/');
 })
+
+app.get('/vizualizare-cos', (req, res) => {
+    const cos = req.session.cos || [];
+    const db = new Database('cumparaturi.db');
+    const produse = cos.map(id => db.prepare('SELECT * FROM fruits WHERE id = ?').get(id));
+    db.close();
+    res.render('vizualizare-cos', { produse });
+});
 
 app.listen(port, () => console.log(`Serverul rulează la adresa http://localhost:${port}/`));
