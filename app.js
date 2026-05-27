@@ -13,7 +13,11 @@ app.use(cookieParser());
 app.use(session({
     secret: 'secret-key',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: false
+    }
 }));
 
 //middleware care face datele utilizatorului din sesiune disponibile în toate view-urile
@@ -21,6 +25,21 @@ app.use((req, res, next) => {
     res.locals.sessionUser = req.session.user;
     next();
 });
+
+//middleware care genereaza un token si il pune disponibil in toate view-urile
+app.use((req, res, next) => {
+    if (!req.session.csrfToken) {
+        req.session.csrfToken = require('crypto').randomBytes(32).toString('hex');
+    }
+    res.locals.csrfToken = req.session.csrfToken;
+    next();
+});
+
+function validateCsrf(req, res, next) {
+    if (req.body._csrf !== req.session.csrfToken)
+        return res.status(403).send('403 Forbidden');
+    next();
+}
 
 function requireAdmin(req, res, next) {
     if (!req.session.user)
@@ -104,7 +123,7 @@ app.get('/admin', requireAdmin, (req, res) => {
     res.render('admin');
 });
 
-app.post('/admin/adaugare-produs', requireAdmin, (req, res) => {
+app.post('/admin/adaugare-produs', requireAdmin, validateCsrf, (req, res) => {
     const db = new Database('cumparaturi.db');
     db.prepare('INSERT INTO fruits (name, price) VALUES (?, ?)').run(req.body.name, parseFloat(req.body.price));
     db.close();
@@ -193,7 +212,7 @@ app.get('/inserare-db', (req, res) => {
     res.redirect('/');
 });
 
-app.post('/adaugare-cos', (req, res) => {
+app.post('/adaugare-cos', validateCsrf, (req, res) => {
     const id = parseInt(req.body.id);
     if (!req.session.cos)
         req.session.cos = [];

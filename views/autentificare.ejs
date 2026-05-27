@@ -3,6 +3,7 @@
 <form action="/verificare-autentificare" method="POST">
     <label>Utilizator: <input type="text" name="user"></label><br><br>
     <label>Parola: <input type="password" name="pass"></label><br><br>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <button type="submit" style="font-size: 16px";>Autentificare</button>
         <% if (mesajEroare) { %>
                 <p style="color: red;"><%= mesajEroare %></p>

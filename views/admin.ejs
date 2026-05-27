@@ -2,5 +2,6 @@
   <form action="/admin/adaugare-produs" method="POST">
       <label>Nume produs: <input type="text" name="name" required></label><br><br>
       <label>Pret: <input type="number" name="price" required></label><br><br>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <button type="submit">Adauga produs</button>
   </form>
