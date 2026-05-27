@@ -193,9 +193,11 @@ app.get('/inserare-db', (req, res) => {
     res.redirect('/');
 });
 
-app.get('/adaugare-cos', (req, res) => {
+app.post('/adaugare-cos', (req, res) => {
     const id = parseInt(req.body.id);
-    cos.push(id);
+    if (!req.session.cos) 
+        req.session.cos = [];
+    req.session.cos.push(id);
     res.redirect('/');
 })
 
