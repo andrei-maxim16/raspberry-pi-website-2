@@ -21,6 +21,14 @@ app.use((req, res, next) => {
     res.locals.sessionUser = req.session.user;
     next();
 });
+
+function requireAdmin(req, res, next) {
+    if (!req.session.user) 
+        return res.status(401).send('Neautentificat');
+    if (req.session.user.rol !== 'ADMIN') 
+        return res.status(403).send('403 Forbidden');
+    next();
+}
 // directorul 'views' va conține fișierele .ejs (html + js executat la server)
 app.set('view engine', 'ejs');
 // suport pentru layout-uri - implicit fișierul care reprezintă template-ul site-ului este views/layout.ejs
@@ -92,6 +100,17 @@ app.get('/chestionar', (req, res) => {
 
 app.get('/autentificare', (req, res) => res.render('autentificare', { mesajEroare: req.cookies.mesajEroare }));
 
+app.get('/admin', requireAdmin, (req, res) => {
+    res.render('admin');
+});
+
+app.post('/admin/adaugare-produs', requireAdmin, (req, res) => {
+      const db = new Database('cumparaturi.db');
+      db.prepare('INSERT INTO fruits (name, price) VALUES (?, ?)').run(req.body.name, parseFloat(req.body.price));
+      db.close();
+      res.redirect('/admin');
+  });
+
 app.post('/verificare-autentificare', (req, res) => {
     const eroare = validateLogin(req.body.user, req.body.pass);
     if (eroare) {
@@ -104,8 +123,10 @@ app.post('/verificare-autentificare', (req, res) => {
 
     if (utilizator && bcrypt.compareSync(req.body.pass, utilizator.parola)) {
         req.session.user = {
-            utilizator: utilizator.utilizator, nume:
-                utilizator.nume, prenume: utilizator.prenume
+            utilizator: utilizator.utilizator,
+            rol: utilizator.rol,
+            nume: utilizator.nume,
+            prenume: utilizator.prenume
         };
         res.redirect('/');
     } else {

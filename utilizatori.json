@@ -2,19 +2,22 @@
     {
         "utilizator": "test",
         "parola": "$2b$10$qwn77bcMK5JvIPD7Zvy1AO9pgeBVbqsDubqeLJGmlG8HDahI0W.Ai",
+        "rol": "USER",
         "nume": "Test",
-        "prenume": "Utilizator"
+        "prenume": "Test"
     },
     {
         "utilizator": "admin",
-        "parola": "$2b$10$RHc2yXfwQmxU.EaPvBVxre7sWpYOrjquVKFYjSM/kV78Ym6P.IJta",
-        "nume": "Popescu",
-        "prenume": "Ion"
-    },
-    {
-        "utilizator": "andrei.maxim",
-        "parola": "$2b$10$W2x6xqZowWlOLtkHEUWEvO0mG4uIdA0IrDBc476JnuNsbcR2afNR2",
+        "parola": "$2b$10$QLTd2kw2ObYFCGWjLCiU8.SMzIFQbF8GBLpvoXMd6gLKPXzxXcwBu",
+        "rol": "ADMIN",
         "nume": "Maxim",
         "prenume": "Andrei"
+    },
+    {
+        "utilizator": "teonika",
+        "parola": "$2b$10$j8wEflutunhM6.ciZteukOc1Oym00OieJMIgyBBKZU4OhQ4p6dDcq",
+        "rol": "USER",
+        "nume": "Parpauta",
+        "prenume": "Teona"
     }
 ]
