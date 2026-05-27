@@ -5,7 +5,7 @@
     <label>Parola: <input type="password" name="pass"></label><br><br>
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <button type="submit" style="font-size: 16px";>Autentificare</button>
-        <% if (mesajEroare) { %>
+        <% if (locals.mesajEroare) { %>
                 <p style="color: red;"><%= mesajEroare %></p>
         <% } %>
 </form>

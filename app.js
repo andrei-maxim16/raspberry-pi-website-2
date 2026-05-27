@@ -8,6 +8,8 @@ const bcrypt = require('bcrypt');
 const app = express();
 const port = 6789;
 
+const loginAttempts = new Map();
+
 app.use(cookieParser());
 
 app.use(session({
@@ -34,6 +36,20 @@ app.use((req, res, next) => {
     res.locals.csrfToken = req.session.csrfToken;
     next();
 });
+
+function checkLoginRateLimit(req, res, next) {
+    const ip = req.ip;
+    const now = Date.now();
+    const attempts = loginAttempts.get(ip) || { count: 0, blockedUntil: 0, cooldown: 15 * 60 * 1000 };
+
+    if (attempts.blockedUntil > now) {
+        const minutes = Math.ceil((attempts.blockedUntil - now) / 60000);
+        return res.render('autentificare', {
+            mesajEroare: `Prea multe încercări. Încearcă din nou în ${minutes} minute.`
+        });
+    }
+    next();
+}
 
 function validateCsrf(req, res, next) {
     if (req.body._csrf !== req.session.csrfToken)
@@ -114,10 +130,7 @@ app.get('/chestionar', (req, res) => {
         const listaIntrebari = JSON.parse(data);
         res.render('chestionar', { intrebari: listaIntrebari });
     });
-    // în fișierul views/chestionar.ejs este accesibilă variabila 'intrebari' care conține vectorul de întrebări
 });
-
-app.get('/autentificare', (req, res) => res.render('autentificare', { mesajEroare: req.cookies.mesajEroare }));
 
 app.get('/admin', requireAdmin, (req, res) => {
     res.render('admin');
@@ -130,7 +143,11 @@ app.post('/admin/adaugare-produs', requireAdmin, validateCsrf, (req, res) => {
     res.redirect('/admin');
 });
 
-app.post('/verificare-autentificare', (req, res) => {
+app.get('/autentificare', (req, res) => {
+    res.render('autentificare', { mesajEroare: req.cookies.mesajEroare })
+});
+
+app.post('/verificare-autentificare', checkLoginRateLimit, (req, res) => {
     const eroare = validateLogin(req.body.user, req.body.pass);
     if (eroare) {
         res.cookie('mesajEroare', eroare);
@@ -141,6 +158,7 @@ app.post('/verificare-autentificare', (req, res) => {
     const utilizator = utilizatori.find(u => u.utilizator === userSanitized);
 
     if (utilizator && bcrypt.compareSync(req.body.pass, utilizator.parola)) {
+        loginAttempts.delete(req.ip);
         req.session.user = {
             utilizator: utilizator.utilizator,
             rol: utilizator.rol,
@@ -149,6 +167,14 @@ app.post('/verificare-autentificare', (req, res) => {
         };
         res.redirect('/');
     } else {
+        const attempts = loginAttempts.get(req.ip) || { count: 0, blockedUntil: 0, cooldown: 15 * 60 * 1000 };
+        attempts.count++;
+        if (attempts.count >= 5) {
+            attempts.blockedUntil = Date.now() + attempts.cooldown;
+            attempts.cooldown *= 2;
+            attempts.count = 0;
+        }
+        loginAttempts.set(req.ip, attempts);
         res.cookie('mesajEroare', 'Utilizator sau parola incorecte!');
         res.redirect('/autentificare');
     }
