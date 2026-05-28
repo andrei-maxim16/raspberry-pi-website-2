@@ -9,6 +9,7 @@ const app = express();
 const port = 6789;
 
 const loginAttempts = new Map();
+const notFoundAttempts = new Map();
 
 app.use(cookieParser());
 
@@ -252,6 +253,31 @@ app.get('/vizualizare-cos', (req, res) => {
     const produse = cos.map(id => db.prepare('SELECT * FROM fruits WHERE id = ?').get(id));
     db.close();
     res.render('vizualizare-cos', { produse });
+});
+
+app.use((req, res) => {
+    const ip = req.ip;
+    const now = Date.now();
+    const data = notFoundAttempts.get(ip) || { count: 0, blockedUntil: 0, firstAttempt: now };
+
+    if (data.blockedUntil > now) {
+        return res.status(403).send('403 Forbidden - IP blocat temporar');
+    }
+
+    if (now - data.firstAttempt > 60000) {
+        data.count = 0;
+        data.firstAttempt = now;
+    }
+
+    data.count++;
+    if (data.count > 10) {
+        data.blockedUntil = Date.now() + 10 * 60 * 1000;
+        notFoundAttempts.set(ip, data);
+        return res.status(403).send('403 Forbidden - IP blocat temporar');
+    }
+
+    notFoundAttempts.set(ip, data);
+    res.status(404).send('404 Not Found');
 });
 
 app.listen(port, () => console.log(`Serverul rulează la adresa http://localhost:${port}/`));
