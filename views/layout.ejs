@@ -15,15 +15,18 @@
             <a href="/"><button>Acasa</button></a>
             <a href="/chestionar"><button>Chestionar</button></a>
             <a href="/vizualizare-cos"><button>Cos cumparaturi</button></a>
-            <% if (!locals.sessionUser) { %>
-                <a href="/autentificare"><button>Autentificare</button></a>
-                <% } else { %>
-                    <span>Autentificat ca <strong>
-                            <%= sessionUser.prenume %>
-                                <%= sessionUser.nume %>
-                        </strong></span>
-                    <a href="/delogare"><button>Delogare</button></a>
-                    <% } %>
+            <% if (locals.sessionUser && sessionUser.rol==='ADMIN' ) { %>
+                <a href="/admin"><button>Panou Admin</button></a>
+                <% } %>
+                    <% if (!locals.sessionUser) { %>
+                        <a href="/autentificare"><button>Autentificare</button></a>
+                        <% } else { %>
+                            <span>Autentificat ca <strong>
+                                    <%= sessionUser.prenume %>
+                                        <%= sessionUser.nume %>
+                                </strong></span>
+                            <a href="/delogare"><button>Delogare</button></a>
+                            <% } %>
         </nav>
     </header>
 
