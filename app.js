@@ -5,6 +5,7 @@ const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 const app = express();
 const port = 6789;
 
@@ -89,8 +90,6 @@ app.get('/', (req, res) => {
 });
 // la accesarea din browser adresei http://localhost:6789/chestionar se va apela funcția specificată
 
-fs = require('fs');
-
 const utilizatori = JSON.parse(fs.readFileSync('utilizatori.json', 'utf8'));
 let modificat = false;
 for (const u of utilizatori) {
@@ -146,6 +145,7 @@ app.post('/admin/adaugare-produs', requireAdmin, validateCsrf, (req, res) => {
 
 app.get('/autentificare', (req, res) => {
     res.render('autentificare', { mesajEroare: req.cookies.mesajEroare })
+    res.clearCookie('mesajEroare');
 });
 
 app.post('/verificare-autentificare', checkLoginRateLimit, (req, res) => {
@@ -208,7 +208,7 @@ app.post('/rezultat-chestionar', (req, res) => {
     });
 });
 
-app.get('/creare-db', (req, res) => {
+app.get('/creare-bd', (req, res) => {
     const db = new Database('cumparaturi.db');
     db.prepare(`
           CREATE TABLE IF NOT EXISTS fruits (
@@ -221,19 +221,22 @@ app.get('/creare-db', (req, res) => {
     res.redirect('/');
 });
 
-app.get('/inserare-db', (req, res) => {
+app.get('/inserare-bd', (req, res) => {
     const db = new Database('cumparaturi.db');
-    const insert = db.prepare('INSERT INTO fruits (name, price) VALUES (@name, @price)');
-    const insertMany = db.transaction((fruits) => {
-        for (const fruit of fruits)
-            insert.run(fruit);
-    });
+    const count = db.prepare('SELECT COUNT(*) as cnt FROM fruits').get();
+    if (count.cnt === 0) {
+        const insert = db.prepare('INSERT INTO fruits (name, price) VALUES (@name, @price)');
+        const insertMany = db.transaction((fruits) => {
+            for (const fruit of fruits)
+                insert.run(fruit);
+        });
 
-    insertMany([
-        { name: 'Banana', price: 2 },
-        { name: 'Apple', price: 1 },
-        { name: 'Strawberry', price: 3 },
-    ]);
+        insertMany([
+            { name: 'Banana', price: 2 },
+            { name: 'Apple', price: 1 },
+            { name: 'Strawberry', price: 3 },
+        ]);
+    }
 
     db.close();
     res.redirect('/');
@@ -250,7 +253,12 @@ app.post('/adaugare-cos', validateCsrf, (req, res) => {
 app.get('/vizualizare-cos', (req, res) => {
     const cos = req.session.cos || [];
     const db = new Database('cumparaturi.db');
-    const produse = cos.map(id => db.prepare('SELECT * FROM fruits WHERE id = ?').get(id));
+    const cantitati = {};
+    cos.forEach(id => cantitati[id] = (cantitati[id] || 0) + 1);
+    const produse = Object.entries(cantitati).map(([id, cant]) => {
+        const produs = db.prepare('SELECT * FROM fruits WHERE id = ?').get(id);
+        return { ...produs, cantitate: cant };
+    });
     db.close();
     res.render('vizualizare-cos', { produse });
 });

@@ -1,32 +1,39 @@
- <!DOCTYPE html>
-  <html lang="ro">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Magazin Online Fructe</title>
-      <link rel="stylesheet" href="/style.css">
-  </head>
-  <body>
-      <header>
-          <h1>Magazin Online Fructe</h1>
-          <nav>
-              <a href="/">Acasă</a>
-              <a href="/chestionar">Chestionar</a>
-              <a href="/vizualizare-cos">Cos cumparaturi</a>
-          </nav>
-        <% if (locals.sessionUser) 
-        { %>
-            <span>Autentificat ca <strong><%= sessionUser.prenume %> <%= sessionUser.nume %></strong></span>
-            <a href="/delogare"><button>Delogare</button></a>
-        <% } %>  
-      </header>
+<!DOCTYPE html>
+<html lang="ro">
 
-      <main>
-          <%- body %>
-      </main>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magazin Online Fructe</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
 
-      <footer>
-          <p>© 2026 Magazin Online</p>
-      </footer>
-  </body>
-  </html>
+<body>
+    <header>
+        <h1>Magazin Online Fructe</h1>
+        <nav>
+            <a href="/"><button>Acasa</button></a>
+            <a href="/chestionar"><button>Chestionar</button></a>
+            <a href="/vizualizare-cos"><button>Cos cumparaturi</button></a>
+            <% if (!locals.sessionUser) { %>
+                <a href="/autentificare"><button>Autentificare</button></a>
+                <% } else { %>
+                    <span>Autentificat ca <strong>
+                            <%= sessionUser.prenume %>
+                                <%= sessionUser.nume %>
+                        </strong></span>
+                    <a href="/delogare"><button>Delogare</button></a>
+                    <% } %>
+        </nav>
+    </header>
+
+    <main>
+        <%- body %>
+    </main>
+
+    <footer>
+        <p>© 2026 Magazin Online</p>
+    </footer>
+</body>
+
+</html>

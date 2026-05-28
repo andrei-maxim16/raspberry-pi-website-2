@@ -1,13 +1,13 @@
 <h2>Coșul meu</h2>
 <% if (produse.length===0) { %>
-    <p>Coșul este gol.</p>
+    <p class="cos-gol">Cosul este gol.</p>
     <% } else { %>
         <ul>
             <% produse.forEach(p=> { %>
                 <li>
-                    <%= p.name %> - <%= p.price %> lei
+                    <%= p.name %> - x<%= p.cantitate %> buc. - <%= p.price * p.cantitate %> lei
                 </li>
                 <% }) %>
         </ul>
         <% } %>
-            <a href="/">Înapoi la produse</a>
+            <a href="/"><button>Inapoi la produse</button></a>

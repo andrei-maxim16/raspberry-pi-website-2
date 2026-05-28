@@ -1,23 +1,22 @@
-<h2>Bine ai venit!</h2>
 
-<a href="/autentificare">Autentificare</a><br>
 
-<% if (locals.sessionUser) { %>
-    <p>Bine ai venit, <%= sessionUser.prenume %> <%= sessionUser.nume %>!</p>
-<% } %>
-
-<a href="/creare-db"><button>Creare BD</button></a><br>
-<a href="/inserare-db"><button>Incarcare BD</button></a><br>
-
-<% fruits.forEach(fruit => { %>
-    <li>
-          <%= fruit.name %> - <%= fruit.price %> lei
-          <% if (sessionUser) { %>
-              <form action="/adaugare-cos" method="POST" style="display:inline">
-                  <input type="hidden" name="id" value="<%= fruit.id %>">
-                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                  <button type="submit">Adauga in cos</button>
-              </form>
-          <% } %>
-      </li>
-<% }) %>
+        <% if (locals.sessionUser) { %>
+            <p>Bine ai venit, <%= sessionUser.prenume %>
+                    <%= sessionUser.nume %>!</p>
+            <% } %>
+                <div class="bd-buttons">
+                    <a href="/creare-bd"><button>Creare BD</button></a><br>
+                    <a href="/inserare-bd"><button>Incarcare BD</button></a><br>
+                </div>
+                <% fruits.forEach(fruit=> { %>
+                    <li>
+                        <%= fruit.name %> - <%= fruit.price %> lei
+                                <% if (sessionUser) { %>
+                                    <form action="/adaugare-cos" method="POST" style="display:inline">
+                                        <input type="hidden" name="id" value="<%= fruit.id %>">
+                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                        <button type="submit">Adauga in cos</button>
+                                    </form>
+                                    <% } %>
+                    </li>
+                    <% }) %>

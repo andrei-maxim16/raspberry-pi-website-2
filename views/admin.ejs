@@ -1,5 +1,5 @@
 <h2>Panou Admin</h2>
-  <form action="/admin/adaugare-produs" method="POST">
+  <form action="/admin/adaugare-produs" method="POST" class="admin-form">
       <label>Nume produs: <input type="text" name="name" required></label><br><br>
       <label>Pret: <input type="number" name="price" required></label><br><br>
       <input type="hidden" name="_csrf" value="<%= csrfToken %>">
